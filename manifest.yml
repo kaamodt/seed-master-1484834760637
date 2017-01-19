@@ -1,7 +1,5 @@
+---
 applications:
 - name:    seed-master
-  domain:  mybluemix.net
-  instances: 1
+  host:    seed-master
   memory:  128M
-  buildpack: https://github.com/cloudfoundry/staticfile-buildpack.git
-  stack: cflinuxfs2
