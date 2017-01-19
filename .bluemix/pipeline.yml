@@ -1,0 +1,64 @@
+---
+stages:
+- name: Build Stage
+  inputs:
+  - url: https://github.com/larshnordli/seed-master-toolchain.git
+    type: git
+    branch: master
+    dir_name: null
+  triggers:
+  - type: commit
+  jobs:
+  - name: Build
+    type: builder
+    artifact_dir: ''
+    build_type: npm
+    script: |-
+      #!/bin/bash
+      # The default Node.js version is 0.10.40
+      # To use Node.js 0.12.7, uncomment the following line:
+      #export PATH=/opt/IBM/node-v0.12/bin:$PATH
+      # To use Node.js 4.2.2, uncomment the following line:
+      #export PATH=/opt/IBM/node-v4.2/bin:$PATH
+      npm install
+- name: Test Stage
+  inputs:
+  - type: job
+    stage: Build Stage
+    job: Build
+    dir_name: null
+  triggers:
+  - type: stage
+  jobs:
+  - name: Test
+    type: tester
+    script: |-
+      #!/bin/bash
+      # invoke tests here
+- name: Deploy Stage
+  inputs:
+  - type: job
+    stage: Build Stage
+    job: Build
+    dir_name: null
+  triggers:
+  - type: stage
+  jobs:
+  - name: Deploy
+    type: deployer
+    target:
+      region_id: ibm:yp:us-south
+      organization: ACIT Org
+      space: dev
+      application: seed-master
+    script: |-
+      #!/bin/bash
+      cf push "${CF_APP}"
+
+      # View logs
+      # cf logs "${CF_APP}" --recent
+hooks:
+- enabled: true
+  label: null
+  ssl_enabled: false
+  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
