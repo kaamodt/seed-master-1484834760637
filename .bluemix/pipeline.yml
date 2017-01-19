@@ -2,8 +2,7 @@
 stages:
 - name: Build Stage
   inputs:
-  - url: https://github.com/larshnordli/seed-master.git
-    type: git
+  - type: git
     branch: master
     dir_name: null
   triggers:
@@ -46,11 +45,6 @@ stages:
   jobs:
   - name: Deploy
     type: deployer
-    target:
-      region_id: ibm:yp:us-south
-      organization: ACIT Org
-      space: dev
-      application: seed-master
     script: |-
       #!/bin/bash
       cf push "${CF_APP}"
