@@ -2,7 +2,7 @@
 stages:
 - name: Build Stage
   inputs:
-  - url: https://github.com/larshnordli/seed-master-toolchain.git
+  - url: https://github.com/larshnordli/seed-master.git
     type: git
     branch: master
     dir_name: null

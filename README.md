@@ -9,3 +9,5 @@ Master repo for backend seed app. Includes boilerplate code and continous delive
 2. In your app, go to Overview and Toolchain. Connect your GitHub repo for the app to the service in "Think" or "Code" section.
 
 3. Bjeff it up!
+
+4. Bjeff it up some more
