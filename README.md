@@ -1,2 +1,4 @@
 # seed-master
-Master repo for seed app
+Master repo for backend seed app. Includes boilerplate code and continous delivery pipeline from Bluemix.
+
+#Instructions
