@@ -5,7 +5,7 @@
         "express": "~4.x",
         "commander": "^2.6.0",
         "http-post": "^0.1.1",
-        "http-proxy": "^1.8.1",
+        "http-proxy": "^1.8.1"
     },
     "main": "server.js",
     "scripts": {
