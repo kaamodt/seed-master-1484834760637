@@ -2,10 +2,9 @@
 stages:
 - name: Build Stage
   inputs:
-  - url: https://github.com/larshnordli/seed-master.git
-    type: git
+  - type: git
     branch: master
-    dir_name: null
+    service: ${SAMPLE_REPO}
   triggers:
   - type: commit
   jobs:
@@ -40,7 +39,6 @@ stages:
   - type: job
     stage: Build Stage
     job: Build
-    dir_name: null
   triggers:
   - type: stage
   jobs:
