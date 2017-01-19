@@ -2,25 +2,14 @@
 stages:
 - name: Build Stage
   inputs:
-  - url: https://github.com/larshnordli/seed-master.git
-    type: git
+  - type: git
     branch: master
-    dir_name: null
+    service: ${SAMPLE_REPO}
   triggers:
   - type: commit
   jobs:
   - name: Build
     type: builder
-    artifact_dir: ''
-    build_type: npm
-    script: |-
-      #!/bin/bash
-      # The default Node.js version is 0.10.40
-      # To use Node.js 0.12.7, uncomment the following line:
-      #export PATH=/opt/IBM/node-v0.12/bin:$PATH
-      # To use Node.js 4.2.2, uncomment the following line:
-      #export PATH=/opt/IBM/node-v4.2/bin:$PATH
-      npm install
 - name: Test Stage
   inputs:
   - type: job
@@ -38,22 +27,49 @@ stages:
 - name: Deploy Stage
   inputs:
   - type: job
-    stage: Build Stage
+    stage: BUILD
     job: Build
-    dir_name: null
   triggers:
   - type: stage
+  properties:
+  - name: CF_APP_NAME
+    value: undefined
+    type: text
+  - name: APP_URL
+    value: undefined
+    type: text
   jobs:
-  - name: Deploy
+  - name: Blue-Green Deploy
     type: deployer
-    script: |-
+    target:
+      region_id: ${PROD_REGION_ID}
+      organization: ${PROD_ORG_NAME}
+      space: ${PROD_SPACE_NAME}
+      application: ${CF_APP_NAME}
+    script: |
       #!/bin/bash
-      cf push "${CF_APP}"
-
+      # Push app
+      if ! cf app $CF_APP; then
+        cf push $CF_APP
+      else
+        OLD_CF_APP=${CF_APP}-OLD-$(date +"%s")
+        rollback() {
+          set +e
+          if cf app $OLD_CF_APP; then
+            cf logs $CF_APP --recent
+            cf delete $CF_APP -f
+            cf rename $OLD_CF_APP $CF_APP
+          fi
+          exit 1
+        }
+        set -e
+        trap rollback ERR
+        cf rename $CF_APP $OLD_CF_APP
+        cf push $CF_APP
+        cf delete $OLD_CF_APP -f
+      fi
+      # Export app name and URL for use in later Pipeline jobs
+      export CF_APP_NAME="$CF_APP"
+      export APP_URL=http://$(cf app $CF_APP_NAME | grep urls: | awk '{print $2}')
       # View logs
-      # cf logs "${CF_APP}" --recent
-hooks:
-- enabled: true
-  label: null
-  ssl_enabled: false
-  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
+      #cf logs "${CF_APP}" --recent
